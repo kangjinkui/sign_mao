@@ -1,5 +1,6 @@
 import type { RadiusItem } from "../types/radius";
 
+const IS_STANDALONE = import.meta.env.VITE_STANDALONE === "true";
 const BASE_URL = import.meta.env.VITE_API_BASE_URL ?? "http://localhost:18100";
 
 type BillboardListResponse = {
@@ -17,6 +18,11 @@ type BillboardListResponse = {
 };
 
 export async function listBillboards(limit = 200): Promise<BillboardListResponse> {
+  if (IS_STANDALONE) {
+    const data = (await import("../data/billboards.json")) as BillboardListResponse;
+    const items = data.items.slice(0, limit);
+    return { count: items.length, items };
+  }
   const response = await fetch(`${BASE_URL}/api/v1/billboards?limit=${limit}`);
   const payload = (await response.json()) as BillboardListResponse;
   if (!response.ok) {
