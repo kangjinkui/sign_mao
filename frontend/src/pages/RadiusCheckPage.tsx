@@ -10,6 +10,7 @@ import { RadiusResultList } from "../components/RadiusResultList";
 import type { GeocodeCandidate, RadiusItem } from "../types/radius";
 
 const RADIUS_M = 200;
+const IS_STANDALONE = import.meta.env.VITE_STANDALONE === "true";
 
 function toRadians(degree: number): number {
   return (degree * Math.PI) / 180;
@@ -184,18 +185,20 @@ export function RadiusCheckPage() {
     <main style={{ maxWidth: 900, margin: "0 auto", padding: 24, display: "grid", gap: 16 }}>
       <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between" }}>
         <h1 style={{ margin: 0 }}>대형광고물 200m 반경 판정</h1>
-        <AdminPanel adminMode={adminMode} onAdminModeChange={handleAdminModeChange} />
+        {!IS_STANDALONE && <AdminPanel adminMode={adminMode} onAdminModeChange={handleAdminModeChange} />}
       </div>
       <AddressSearchForm onSearch={(address) => void runSearch(address)} loading={loading} />
       <div style={{ display: "flex", alignItems: "center", gap: 8 }}>
-        <button type="button" onClick={() => void loadDbMarkers()} disabled={dbLoading}>
-          {dbLoading ? "DB 데이터 새로고침 중..." : "DB 데이터 새로고침"}
-        </button>
+        {!IS_STANDALONE && (
+          <button type="button" onClick={() => void loadDbMarkers()} disabled={dbLoading}>
+            {dbLoading ? "DB 데이터 새로고침 중..." : "DB 데이터 새로고침"}
+          </button>
+        )}
         <small>
-          마지막 갱신: {lastDbLoadedAt ? lastDbLoadedAt.toLocaleTimeString("ko-KR") : "아직 없음"}
+          {IS_STANDALONE ? `내장 데이터 (${dbSourceCount}건)` : `마지막 갱신: ${lastDbLoadedAt ? lastDbLoadedAt.toLocaleTimeString("ko-KR") : "아직 없음"}`}
         </small>
-        <small>DB 원본 건수: {dbSourceCount}</small>
-        {adminMode && (
+        {!IS_STANDALONE && <small>DB 원본 건수: {dbSourceCount}</small>}
+        {!IS_STANDALONE && adminMode && (
           <button type="button" onClick={() => setFormItem("new")} style={{ marginLeft: "auto" }}>
             + 광고물 등록
           </button>
@@ -236,7 +239,7 @@ export function RadiusCheckPage() {
       <RadiusResultList
         items={showAllItems ? dbMarkers : filteredItems}
         onMoveToMap={(item) => setFocusedItem(item)}
-        adminMode={adminMode}
+        adminMode={IS_STANDALONE ? false : adminMode}
         onEdit={(item) => setFormItem(item)}
         onDelete={(item) => void handleDelete(item)}
       />

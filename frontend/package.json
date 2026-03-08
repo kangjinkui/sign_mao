@@ -6,6 +6,7 @@
   "scripts": {
     "dev": "vite --host 0.0.0.0 --port 5173",
     "build": "tsc -b && vite build",
+    "build:standalone": "tsc -b && VITE_STANDALONE=true vite build --outDir dist-standalone",
     "preview": "vite preview --host 0.0.0.0 --port 4173",
     "test": "vitest run",
     "test:e2e": "playwright test"
@@ -24,6 +25,7 @@
     "jsdom": "^25.0.1",
     "typescript": "^5.5.4",
     "vite": "^5.4.2",
+    "vite-plugin-singlefile": "^2.3.0",
     "vitest": "^2.1.1"
   }
 }
