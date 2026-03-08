@@ -1,0 +1,46 @@
+services:
+  db:
+    image: postgis/postgis:16-3.4
+    container_name: sign_map_db
+    environment:
+      POSTGRES_DB: sign_map
+      POSTGRES_USER: sign_map
+      POSTGRES_PASSWORD: sign_map
+    ports:
+      - "15432:5432"
+    volumes:
+      - pgdata:/var/lib/postgresql/data
+
+  backend:
+    build:
+      context: .
+      dockerfile: docker/backend/Dockerfile
+    container_name: sign_map_backend
+    env_file:
+      - backend/.env
+    ports:
+      - "18100:8000"
+    volumes:
+      - ./backend:/app
+      - ./data:/data
+    depends_on:
+      - db
+
+  frontend:
+    build:
+      context: .
+      dockerfile: docker/frontend/Dockerfile
+    container_name: sign_map_frontend
+    env_file:
+      - frontend/.env
+    ports:
+      - "15173:5173"
+    volumes:
+      - ./frontend:/app
+      - /app/node_modules
+    depends_on:
+      - backend
+    command: sh -c "npm install --include=optional && npm run dev"
+
+volumes:
+  pgdata:

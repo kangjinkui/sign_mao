@@ -1,0 +1,39 @@
+# Python
+__pycache__/
+*.pyc
+*.pyo
+.pytest_cache/
+.venv/
+*.egg-info/
+
+# Node
+node_modules/
+
+# Builds
+build/
+dist/
+
+# Env
+.env
+.env.*
+
+# Editor/OS
+.vscode/
+.idea/
+.DS_Store
+Thumbs.db
+
+# Logs & test results
+*.log
+test-results/
+
+# Claude Code local settings
+.claude/
+
+# bkit runtime state
+.bkit/state/
+.bkit/runtime/
+.bkit/snapshots/
+
+# Excel temp files
+~$*

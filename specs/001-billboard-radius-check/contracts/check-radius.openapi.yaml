@@ -1,0 +1,147 @@
+openapi: 3.0.3
+info:
+  title: Billboard Radius Check API
+  version: 1.0.0
+  description: 주소 기준 200m 반경 내 대형광고물 판정 API
+servers:
+  - url: http://localhost:8000
+paths:
+  /api/v1/check-radius:
+    post:
+      summary: 주소 기준 200m 반경 판정
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required: [address]
+              properties:
+                address:
+                  type: string
+                  example: 서울 강남구 도산대로 306
+                selected_candidate_id:
+                  type: string
+                  nullable: true
+      responses:
+        '200':
+          description: 판정 성공
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/CheckRadiusResponse'
+        '400':
+          description: 입력 오류
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+        '422':
+          description: 지오코딩 오류 또는 다중 후보 선택 필요
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+        '500':
+          description: 내부 오류
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+  /api/v1/import/billboards:
+    post:
+      summary: 대형광고물 원본 파일 수동 업로드/적재
+      requestBody:
+        required: true
+        content:
+          multipart/form-data:
+            schema:
+              type: object
+              required: [file]
+              properties:
+                file:
+                  type: string
+                  format: binary
+      responses:
+        '202':
+          description: 적재 시작
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  job_id:
+                    type: string
+                  status:
+                    type: string
+                    example: STARTED
+        '400':
+          description: 입력 오류
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+        '500':
+          description: 내부 오류
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+components:
+  schemas:
+    CheckRadiusResponse:
+      type: object
+      properties:
+        input:
+          type: object
+          properties:
+            address:
+              type: string
+            lat:
+              type: number
+            lng:
+              type: number
+        radius:
+          type: integer
+          example: 200
+        count:
+          type: integer
+        items:
+          type: array
+          items:
+            type: object
+            properties:
+              company:
+                type: string
+              ad_type:
+                type: string
+              address:
+                type: string
+              distance_m:
+                type: number
+        geocode_candidates:
+          type: array
+          description: 다중 후보일 때 최대 5개
+          items:
+            type: object
+            properties:
+              candidate_id:
+                type: string
+              address:
+                type: string
+              lat:
+                type: number
+              lng:
+                type: number
+    ErrorResponse:
+      type: object
+      required: [code, message]
+      properties:
+        code:
+          type: string
+          enum: [VALIDATION_ERROR, GEOCODING_ERROR, INTERNAL_ERROR]
+        message:
+          type: string
+        details:
+          type: object
+          nullable: true
